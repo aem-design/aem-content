@@ -2,6 +2,12 @@
 
 Helpers to export and import content into AEM instances.
 
+## Prerequisites
+
+You will need to have the following software installed to ensure you can contribute to development of this codebase:
+
+* [Powershell 7](https://github.com/PowerShell/PowerShell/releases) - this will make your windows terminal work check with `$PSVersionTable`
+
 ## Update your paths you want to export
 
 1. update variable `$ROOT_PATHS` in file `filevault-export.ps1` to allow extract of content from AEM instance. 
