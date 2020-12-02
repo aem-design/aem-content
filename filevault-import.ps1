@@ -14,7 +14,7 @@
     [string]$SOURCE_WEBDAV_PATH = "/crx",
     [string]$SCHEMA = "http",
     #to set additional flags if required
-    [string]$VLT_FLAGS = "--insecure",
+    [string]$VLT_FLAGS = "--insecure -Xmx2g",
     [string]$VLT_CMD = "./bin/vlt",
     [string]$ROOT_PATH = "/",
     [string]$CONTENT_SOURCE = "src\main\content\jcr_root",
@@ -156,9 +156,6 @@ function doSlingPost {
 
     $Response = Invoke-WebRequest -Method Post -Headers $HEADERS -TimeoutSec $Timeout -Uri "$Url" -Form $Body -ContentType "application/x-www-form-urlencoded"
 
-#    $Response.Content
-
-
 }
 
 Write-Host "------- CONFIG ----------"
@@ -194,7 +191,7 @@ doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE
 Write-Host "------- START Importing content ----------"
 Write-Host "${VLT_CMD} ${VLT_FLAGS} --credentials ${SOURCE_AEM_USER}:****** import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH}"
 
-Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} -Xmx2g --credentials ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH} " | Tee-Object -FilePath "..\filevailt-import.log"
+Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH} " | Tee-Object -FilePath "..\filevailt-import.log"
 
 Write-Host "------- END Importing content ----------"
 

@@ -12,14 +12,14 @@
     [string]$SOURCE_WEBDAV_PATH = "/crx",
     [string]$SCHEMA = "http",
     #to set additional flags if required
-    [string]$VLT_FLAGS = "--insecure",
+    [string]$VLT_FLAGS = "--insecure -Xmx2g",
     [string]$VLT_CMD = "./bin/vlt",
     # Root folder name for placing content
     [string]$CONTENT_DESTINATION = ".\src\main\content",
     [string]$FILTER_FILE = "${CONTENT_DESTINATION}\META-INF\vault\filter.xml",
     [string]$FILTER_FILE_LOCATION = "${CONTENT_DESTINATION}\META-INF",
     [string[]]$ROOT_PATHS = (
-        "/content/dam/",
+        "/content/dam/"
     ),
     [switch]$Silent = $false
 )
@@ -86,13 +86,26 @@ $ROOT_PATHS | ForEach-Object {
     Write-Host "START Export $_"
     $LOG_FILENAME = "$_".Replace("/","-")
 
-    Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} -Xmx2g --credentials ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} export -v ${SCHEMA}://${SOURCE_HOST}:${SOURCE_PORT}${SOURCE_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}" | Tee-Object -FilePath "..\filevailt-export-$LOG_FILENAME.log"
-    # Need to delete Filter File so that export process does not get confused
-    if (-Not($_ -eq $ROOT_PATHS_LAST)) {
-        if (-Not($FILTER_FILE_LOCATION.StartsWith("./"))) {
-            Remove-Item $FILTER_FILE
-        }
+    Write-Host "Remove Filer..."
+    Copy-Item ".\src\main\content\META-INF\vault\filter-blank.xml" -Destination "$FILTER_FILE"
+
+    Write-Host "Create filter for: $_"
+    $FILTER_XML = [xml](Get-Content $FILTER_FILE)
+    $FILTER_XML_CONTENT = $FILTER_XML.SelectNodes("//workspaceFilter")
+    $FILTER_XML_DELETE = $FILTER_XML_CONTENT.SelectNodes('//filter')
+    $FILTER_XML_DELETE | ForEach-Object{
+        $DELETE_STATUS = $FILTER_XML_CONTENT.RemoveChild($_)
     }
+    $FILTER_XML_CONTENT_NEW = $FILTER_XML.CreateNode("element","filter","")
+    $FILTER_XML_CONTENT_NEW.SetAttribute("root",$_)
+    $FILTER_XML_CONTENT_NEW_ADD = $FILTER_XML_CONTENT.AppendChild($FILTER_XML_CONTENT_NEW)
+    Write-Host "Saving..."
+    $FILTER_XML.OuterXml | IndentXML -Indent 4 | Out-File $FILTER_FILE -encoding "UTF8"
+    Write-Host "Done..."
+
+    Write-Host "Funning VLT..."
+    Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} export -v ${SCHEMA}://${SOURCE_HOST}:${SOURCE_PORT}${SOURCE_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}" | Tee-Object -FilePath "..\filevailt-export-$LOG_FILENAME.log"
+
     Write-Host "END Export $_"
 }
 
