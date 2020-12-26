@@ -69,26 +69,26 @@ function doSlingPost {
     }
 
 
-    Write-Host "Performing action $Method on $Url."
+    Write-Output "Performing action $Method on $Url."
 
     (Invoke-WebRequest -Method Post -Headers $HEADERS -TimeoutSec $Timeout -Uri "$Url" -Body $Body -ContentType "application/x-www-form-urlencoded").Content
 
-    Write-Host "Body:"
+    Write-Output "Body:"
 
     $Body | ConvertTo-Json
 
 }
 
-Write-Host "SERVER_PATH_CONFIG_WEBDAV: $SERVER_PATH_CONFIG_WEBDAV"
-Write-Host "AEM_HOST: $AEM_HOST"
-Write-Host "AEM_SCHEMA: $AEM_SCHEMA"
-Write-Host "AEM_PORT: $AEM_PORT"
-Write-Host "TIMEOUT: $TIMEOUT"
-Write-Host "Silent: $Silent"
-Write-Host "BODY `t {"
+Write-Output "SERVER_PATH_CONFIG_WEBDAV: $SERVER_PATH_CONFIG_WEBDAV"
+Write-Output "AEM_HOST: $AEM_HOST"
+Write-Output "AEM_SCHEMA: $AEM_SCHEMA"
+Write-Output "AEM_PORT: $AEM_PORT"
+Write-Output "TIMEOUT: $TIMEOUT"
+Write-Output "Silent: $Silent"
+Write-Output "BODY `t {"
 $BODY.GetEnumerator().ForEach({ "`t   $($_.Name) = $($_.Value)`r" })
-Write-Host "`t }"
-Write-Host "ADDRESS: $ADDRESS"
+Write-Output "`t }"
+Write-Output "ADDRESS: $ADDRESS"
 
 if (-not($Silent))
 {
@@ -96,7 +96,7 @@ if (-not($Silent))
 
     if ($START -ne "y")
     {
-        Write-Host "Quiting..."
+        Write-Output "Quiting..."
         Exit
     }
 }

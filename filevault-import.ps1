@@ -152,22 +152,22 @@ function doSlingPost {
     }
 
 
-    Write-Host "Performing action $Method on $Url."
+    Write-Output "Performing action $Method on $Url."
 
     $Response = Invoke-WebRequest -Method Post -Headers $HEADERS -TimeoutSec $Timeout -Uri "$Url" -Form $Body -ContentType "application/x-www-form-urlencoded"
 
 }
 
-Write-Host "------- CONFIG ----------"
-Write-Host "AEM_SCHEMA: $AEM_SCHEMA"
-Write-Host "AEM_HOST: $AEM_HOST"
-Write-Host "AEM_PORT: $AEM_PORT"
-Write-Host "AEM_USER: $AEM_USER"
-Write-Host "CONTENT_SOURCE: $CONTENT_SOURCE"
-Write-Host "ROOT_PATH: $ROOT_PATH"
-Write-Host "Silent: $Silent"
-Write-Host "VLT_FLAGS: $VLT_FLAGS"
-Write-Host "VLT_CMD: $VLT_CMD"
+Write-Output "------- CONFIG ----------"
+Write-Output "AEM_SCHEMA: $AEM_SCHEMA"
+Write-Output "AEM_HOST: $AEM_HOST"
+Write-Output "AEM_PORT: $AEM_PORT"
+Write-Output "AEM_USER: $AEM_USER"
+Write-Output "CONTENT_SOURCE: $CONTENT_SOURCE"
+Write-Output "ROOT_PATH: $ROOT_PATH"
+Write-Output "Silent: $Silent"
+Write-Output "VLT_FLAGS: $VLT_FLAGS"
+Write-Output "VLT_CMD: $VLT_CMD"
 
 if (-not($Silent))
 {
@@ -175,31 +175,31 @@ if (-not($Silent))
 
     if ($START -ne "y")
     {
-        Write-Host "Quiting..."
+        Write-Output "Quiting..."
         Exit
     }
 }
 
-Write-Host "------- Disable Workflows ----------"
+Write-Output "------- Disable Workflows ----------"
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 
-Write-Host "------- Disable aem mailer bundle ----------"
+Write-Output "------- Disable aem mailer bundle ----------"
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 
 
-Write-Host "------- START Importing content ----------"
-Write-Host "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH}"
+Write-Output "------- START Importing content ----------"
+Write-Output "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH}"
 
 Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH} " | Tee-Object -FilePath "..\filevailt-import.log"
 
-Write-Host "------- END Importing content ----------"
+Write-Output "------- END Importing content ----------"
 
 
-Write-Host "------- Enable Workflows ----------"
+Write-Output "------- Enable Workflows ----------"
 
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 
-Write-Host "------- Enable aem mailer bundle ----------"
+Write-Output "------- Enable aem mailer bundle ----------"
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE_ENABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
