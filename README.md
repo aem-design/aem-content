@@ -83,17 +83,17 @@ Purpose of scripts
 
 ```powershell
     #equivalent of using localhost in docker container
-    [string]$SOURCE_HOST = "localhost",
+    [string]$AEM_HOST = "localhost",
     # TCP port SOURCE_CQ listens on
-    [string]$SOURCE_PORT = "4502",
-    # AEM Admin user for SOURCE_HOST
-    [string]$SOURCE_AEM_USER = "admin",
-    # AEM Admin password for SOURCE_HOST
-    [string]$SOURCE_AEM_PASSWORD = "admin",
+    [string]$AEM_PORT = "4502",
+    # AEM Admin user for AEM_HOST
+    [string]$AEM_USER = "admin",
+    # AEM Admin password for AEM_HOST
+    [string]$AEM_PASSWORD = "admin",
     # Server WebDav Path
     #$SOURCE_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
     [string]$SOURCE_WEBDAV_PATH = "/crx",
-    [string]$SCHEMA = "http",
+    [string]$AEM_SCHEMA = "http",
     #to set additional flags if required
     [string]$VLT_FLAGS = "--insecure",
     [string]$VLT_CMD = "./bin/vlt",
@@ -109,16 +109,16 @@ Purpose of scripts
 
 ```powershell
     #equivalent of using localhost in docker container
-    $SOURCE_HOST = "localhost",
+    $AEM_HOST = "localhost",
     # TCP port SOURCE_CQ listens on
-    $SOURCE_PORT = "4502",
-    # AEM Admin user for SOURCE_HOST
-    $SOURCE_AEM_USER = "admin",
-    # AEM Admin password for SOURCE_HOST
-    $SOURCE_AEM_PASSWORD = "admin",
+    $AEM_PORT = "4502",
+    # AEM Admin user for AEM_HOST
+    $AEM_USER = "admin",
+    # AEM Admin password for AEM_HOST
+    $AEM_PASSWORD = "admin",
     # Root folder name for placing content
     $SOURCE_CONTENT_FOLDER = "localhost-author-export",
-    $SCHEMA = "http",
+    $AEM_SCHEMA = "http",
     #to set additional flags if required
     $VLT_FLAGS = "--insecure", 
     $VLT_CMD = "./bin/vlt",
@@ -127,7 +127,7 @@ Purpose of scripts
     # connection timeout
     $TIMEOUT = "5",
     # host address
-    $ADDRESS = "${SCHEMA}://${SOURCE_HOST}:${SOURCE_PORT}"
+    $ADDRESS = "${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}"
 ```
 
 ## Export Content from an Environment

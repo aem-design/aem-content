@@ -1,9 +1,11 @@
 ﻿Param(
     [string]$SERVER_PATH_CONFIG_WEBDAV = "/apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet",
-    [string]$LOGIN = "admin:admin",
-    [string]$SERVER_HOST = "localhost",
-    [string]$PROTOCOL = "http",
-    [string]$PORT = 4502,
+    [string]$AEM_USERNAME = "admin",
+    [string]$AEM_PASSWORD = "admin",
+    [string]$LOGIN = "${AEM_USERNAME}:${AEM_PASSWORD}",
+    [string]$AEM_HOST = "localhost",
+    [string]$AEM_SCHEMA = "http",
+    [string]$AEM_PORT = 4502,
     [string]$TIMEOUT = 5,
     [HashTable]$BODY = @{
         "jcr:primaryType"="sling:OsgiConfig"
@@ -13,15 +15,15 @@
         "../../jcr:primaryType"="sling:Folder"
         "../jcr:primaryType"="sling:Folder"
     },
-    [string]$ADDRESS = "${PROTOCOL}://${SERVER_HOST}:${PORT}",
+    [string]$ADDRESS = "${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}",
     [switch]$Silent = $false
 )
 
 function doSlingPost {
 	[CmdletBinding()]
 	Param (
-	
-	    [Parameter(Mandatory=$true)] 
+
+	    [Parameter(Mandatory=$true)]
 	    [string]$Url="http://localhost:4502",
 
         [Parameter(Mandatory)]
@@ -29,20 +31,20 @@ function doSlingPost {
         [ValidateSet('Post','Delete')]
         [string]$Method,
 
-	    [Parameter(Mandatory=$false)] 
+	    [Parameter(Mandatory=$false)]
 	    [HashTable]$Body,
 
 	    [Parameter(Mandatory=$false,
-        HelpMessage="Provide Basic Auth Credentials in following format: <user>:<pass>")] 
+        HelpMessage="Provide Basic Auth Credentials in following format: <user>:<pass>")]
 	    [string]$BasicAuthCreds="",
 
-	    [Parameter(Mandatory=$false)] 
+	    [Parameter(Mandatory=$false)]
 	    [string]$UserAgent="",
 
-	    [Parameter(Mandatory=$false)] 
+	    [Parameter(Mandatory=$false)]
 	    [string]$Referer="",
 
-	    [Parameter(Mandatory=$false)] 
+	    [Parameter(Mandatory=$false)]
 	    [string]$Timeout="5"
 
 	)
@@ -66,21 +68,21 @@ function doSlingPost {
        $HEADERS.add("Authorization","Basic $BASICAUTH")
     }
 
-    
+
     Write-Host "Performing action $Method on $Url."
 
     (Invoke-WebRequest -Method Post -Headers $HEADERS -TimeoutSec $Timeout -Uri "$Url" -Body $Body -ContentType "application/x-www-form-urlencoded").Content
 
     Write-Host "Body:"
 
-    $Body | ConvertTo-Json     
+    $Body | ConvertTo-Json
 
 }
 
 Write-Host "SERVER_PATH_CONFIG_WEBDAV: $SERVER_PATH_CONFIG_WEBDAV"
-Write-Host "SERVER_HOST: $SERVER_HOST"
-Write-Host "PROTOCOL: $PROTOCOL"
-Write-Host "PORT: $PORT"
+Write-Host "AEM_HOST: $AEM_HOST"
+Write-Host "AEM_SCHEMA: $AEM_SCHEMA"
+Write-Host "AEM_PORT: $AEM_PORT"
 Write-Host "TIMEOUT: $TIMEOUT"
 Write-Host "Silent: $Silent"
 Write-Host "BODY `t {"

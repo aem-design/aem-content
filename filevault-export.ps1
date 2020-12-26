@@ -1,16 +1,16 @@
 ﻿Param(
     #equivalent of using localhost in docker container
-    [string]$SOURCE_HOST = "localhost",
+    [string]$AEM_HOST = "localhost",
     # TCP port SOURCE_CQ listens on
-    [string]$SOURCE_PORT = "4502",
-    # AEM Admin user for SOURCE_HOST
-    [string]$SOURCE_AEM_USER = "admin",
-    # AEM Admin password for SOURCE_HOST
-    [string]$SOURCE_AEM_PASSWORD = "admin",
+    [string]$AEM_PORT = "4502",
+    # AEM Admin user for AEM_HOST
+    [string]$AEM_USER = "admin",
+    # AEM Admin password for AEM_HOST
+    [string]$AEM_PASSWORD = "admin",
     # Server WebDav Path
     #$SOURCE_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
     [string]$SOURCE_WEBDAV_PATH = "/crx",
-    [string]$SCHEMA = "http",
+    [string]$AEM_SCHEMA = "http",
     #to set additional flags if required
     [string]$VLT_FLAGS = "--insecure -Xmx2g",
     [string]$VLT_CMD = "./bin/vlt",
@@ -54,10 +54,10 @@ Function Format-XMLIndent
 
 
 Write-Host "------- CONFIG ----------"
-Write-Host "SCHEMA: $SCHEMA"
-Write-Host "SOURCE_HOST: $SOURCE_HOST"
-Write-Host "SOURCE_PORT: $SOURCE_PORT"
-Write-Host "SOURCE_AEM_USER: $SOURCE_AEM_USER"
+Write-Host "AEM_SCHEMA: $AEM_SCHEMA"
+Write-Host "AEM_HOST: $AEM_HOST"
+Write-Host "AEM_PORT: $AEM_PORT"
+Write-Host "AEM_USER: $AEM_USER"
 Write-Host "CONTENT_DESTINATION: $CONTENT_DESTINATION"
 Write-Host "ROOT_PATHS: $ROOT_PATHS"
 Write-Host "FILTER_FILE: $FILTER_FILE"
@@ -66,7 +66,7 @@ Write-Host "VLT_FLAGS: $VLT_FLAGS"
 Write-Host "VLT_CMD:"
 
 $ROOT_PATHS | ForEach-Object {
-    Write-Host "${VLT_CMD} ${VLT_FLAGS} --credentials ${SOURCE_AEM_USER}:****** export -v ${SCHEMA}://${SOURCE_HOST}:${SOURCE_PORT}${SOURCE_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}"
+    Write-Host "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${SOURCE_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}"
 }
 
 if (-not($Silent))
@@ -103,8 +103,8 @@ $ROOT_PATHS | ForEach-Object {
     $FILTER_XML.OuterXml | IndentXML -Indent 4 | Out-File $FILTER_FILE -encoding "UTF8"
     Write-Host "Done..."
 
-    Write-Host "Funning VLT..."
-    Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} export -v ${SCHEMA}://${SOURCE_HOST}:${SOURCE_PORT}${SOURCE_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}" | Tee-Object -FilePath "..\filevailt-export-$LOG_FILENAME.log"
+    Write-Host "Running VLT..."
+    Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:${AEM_PASSWORD} export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${SOURCE_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}" | Tee-Object -FilePath "..\filevailt-export-$LOG_FILENAME.log"
 
     Write-Host "END Export $_"
 }

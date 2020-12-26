@@ -1,18 +1,18 @@
 ﻿Param(
     #equivalent of using localhost in docker container
-    [string]$SOURCE_HOST = "localhost",
+    [string]$AEM_HOST = "localhost",
     # TCP port SOURCE_CQ listens on
-    [string]$SOURCE_PORT = "4502",
-    # AEM Admin user for SOURCE_HOST
-    [string]$SOURCE_AEM_USER = "admin",
-    # AEM Admin password for SOURCE_HOST
-    [string]$SOURCE_AEM_PASSWORD = "admin",
+    [string]$AEM_PORT = "4502",
+    # AEM Admin user for AEM_HOST
+    [string]$AEM_USER = "admin",
+    # AEM Admin password for AEM_HOST
+    [string]$AEM_PASSWORD = "admin",
     # Root folder name for placing content
     [string]$SOURCE_CONTENT_FOLDER = "localhost-author-export",
     # Server WebDav Path
     #$SOURCE_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
     [string]$SOURCE_WEBDAV_PATH = "/crx",
-    [string]$SCHEMA = "http",
+    [string]$AEM_SCHEMA = "http",
     #to set additional flags if required
     [string]$VLT_FLAGS = "--insecure -Xmx2g",
     [string]$VLT_CMD = "./bin/vlt",
@@ -21,7 +21,7 @@
     # connection timeout
     [string]$TIMEOUT = "5",
     # host address
-    [string]$ADDRESS = "${SCHEMA}://${SOURCE_HOST}:${SOURCE_PORT}",
+    [string]$ADDRESS = "${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}",
     # Workflow Assets Modify path
     [string]$WORKFLOW_ASSET_MODIFY = "/conf/global/settings/workflow/launcher/config/update_asset_mod",
     # Workflow Assets Create path
@@ -159,10 +159,10 @@ function doSlingPost {
 }
 
 Write-Host "------- CONFIG ----------"
-Write-Host "SCHEMA: $SCHEMA"
-Write-Host "SOURCE_HOST: $SOURCE_HOST"
-Write-Host "SOURCE_PORT: $SOURCE_PORT"
-Write-Host "SOURCE_AEM_USER: $SOURCE_AEM_USER"
+Write-Host "AEM_SCHEMA: $AEM_SCHEMA"
+Write-Host "AEM_HOST: $AEM_HOST"
+Write-Host "AEM_PORT: $AEM_PORT"
+Write-Host "AEM_USER: $AEM_USER"
 Write-Host "CONTENT_SOURCE: $CONTENT_SOURCE"
 Write-Host "ROOT_PATH: $ROOT_PATH"
 Write-Host "Silent: $Silent"
@@ -181,15 +181,15 @@ if (-not($Silent))
 }
 
 Write-Host "------- Disable Workflows ----------"
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} -Timeout $TIMEOUT
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} -Timeout $TIMEOUT
+doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
+doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 
 Write-Host "------- Disable aem mailer bundle ----------"
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} -Timeout $TIMEOUT
+doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 
 
 Write-Host "------- START Importing content ----------"
-Write-Host "${VLT_CMD} ${VLT_FLAGS} --credentials ${SOURCE_AEM_USER}:****** import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH}"
+Write-Host "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH}"
 
 Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH} " | Tee-Object -FilePath "..\filevailt-import.log"
 
@@ -198,8 +198,8 @@ Write-Host "------- END Importing content ----------"
 
 Write-Host "------- Enable Workflows ----------"
 
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} -Timeout $TIMEOUT
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} -Timeout $TIMEOUT
+doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
+doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 
 Write-Host "------- Enable aem mailer bundle ----------"
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE_ENABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} -Timeout $TIMEOUT
+doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE_ENABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
