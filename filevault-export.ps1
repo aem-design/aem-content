@@ -8,8 +8,8 @@
     # AEM Admin password for AEM_HOST
     [string]$AEM_PASSWORD = "admin",
     # Server WebDav Path
-    #$SOURCE_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
-    [string]$SOURCE_WEBDAV_PATH = "/crx",
+    #$AEM_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
+    [string]$AEM_WEBDAV_PATH = "/crx",
     [string]$AEM_SCHEMA = "http",
     #to set additional flags if required
     [string]$VLT_FLAGS = "--insecure -Xmx2g",
@@ -18,12 +18,9 @@
     [string]$CONTENT_DESTINATION = ".\src\main\content",
     [string]$FILTER_FILE = "${CONTENT_DESTINATION}\META-INF\vault\filter.xml",
     [string]$FILTER_FILE_LOCATION = "${CONTENT_DESTINATION}\META-INF",
-    [string[]]$ROOT_PATHS = (
-        "/content/dam/"
-    ),
+    [string[]]$ROOT_PATHS,
     [switch]$Silent = $false
 )
-
 
 Function Format-XMLIndent
 {
@@ -53,6 +50,31 @@ Function Format-XMLIndent
 }
 
 
+Function GetFilterList
+{
+    [Cmdletbinding()]
+    [Alias("filterList")]
+    param
+    (
+        [Parameter(ValueFromPipeline)]
+        [string]$FILTER_FILE = ".\src\main\content\META-INF\vault\filter.xml"
+    )
+    $FILTER_PATHS = [System.Collections.ArrayList]::new()
+
+    $FILTER_XML = [xml](Get-Content $FILTER_FILE)
+    $FILTER_XML_CONTENT = $FILTER_XML.SelectNodes("//workspaceFilter")
+    $FILTER_XML_ITEMS = $FILTER_XML_CONTENT.SelectNodes('//filter')
+    $FILTER_XML_ITEMS | ForEach-Object {
+        [void]$FILTER_PATHS.Add($_.root)
+    }
+
+    return $FILTER_PATHS
+}
+
+if (-not($ROOT_PATHS)) {
+    $ROOT_PATHS = GetFilterList
+}
+
 Write-Output "------- CONFIG ----------"
 Write-Output "AEM_SCHEMA: $AEM_SCHEMA"
 Write-Output "AEM_HOST: $AEM_HOST"
@@ -66,7 +88,7 @@ Write-Output "VLT_FLAGS: $VLT_FLAGS"
 Write-Output "VLT_CMD:"
 
 $ROOT_PATHS | ForEach-Object {
-    Write-Output "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${SOURCE_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}"
+    Write-Output "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${AEM_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}"
 }
 
 if (-not($Silent))
@@ -104,7 +126,7 @@ $ROOT_PATHS | ForEach-Object {
     Write-Output "Done..."
 
     Write-Output "Running VLT..."
-    Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:${AEM_PASSWORD} export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${SOURCE_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}" | Tee-Object -FilePath "..\filevailt-export-$LOG_FILENAME.log"
+    Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:${AEM_PASSWORD} export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${AEM_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}" | Tee-Object -FilePath "..\filevailt-export-$LOG_FILENAME.log"
 
     Write-Output "END Export $_"
 }

@@ -91,8 +91,8 @@ Purpose of scripts
     # AEM Admin password for AEM_HOST
     [string]$AEM_PASSWORD = "admin",
     # Server WebDav Path
-    #$SOURCE_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
-    [string]$SOURCE_WEBDAV_PATH = "/crx",
+    #$AEM_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
+    [string]$AEM_WEBDAV_PATH = "/crx",
     [string]$AEM_SCHEMA = "http",
     #to set additional flags if required
     [string]$VLT_FLAGS = "--insecure",

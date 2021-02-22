@@ -386,8 +386,8 @@
                     <artifactId>maven-sling-plugin</artifactId>
                     <version>2.1.0</version>
                     <configuration>
-                        <user>${crx.username}</user>
-                        <password>${crx.password}</password>
+                        <user>${aem.username}</user>
+                        <password>${aem.password}</password>
                     </configuration>
                 </plugin>
                 <!-- Content Package Plugin -->
@@ -398,11 +398,11 @@
                     <extensions>true</extensions>
                     <configuration>
                         <failOnError>true</failOnError>
-                        <userId>${crx.username}</userId>
-                        <password>${crx.password}</password>
+                        <userId>${aem.username}</userId>
+                        <password>${aem.password}</password>
                         <group>${package.group}</group>
                         <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
-                        <targetURL>${package.uploadProtocol}://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
+                        <targetURL>${package.uploadProtocol}://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
                     </configuration>
                 </plugin>
                 <!--This plugin's configuration is used to store Eclipse
@@ -506,9 +506,9 @@
                                     <goal>install</goal>
                                 </goals>
                                 <configuration>
-                                    <targetURL>${package.uploadProtocol}://${publish.crx.host}:${publish.crx.port}/crx/packmgr/service.jsp</targetURL>
-                                    <username>${publish.crx.username}</username>
-                                    <password>${publish.crx.password}</password>
+                                    <targetURL>${package.uploadProtocol}://${publish.aem.host}:${publish.aem.port}/crx/packmgr/service.jsp</targetURL>
+                                    <username>${publish.aem.username}</username>
+                                    <password>${publish.aem.password}</password>
                                 </configuration>
                             </execution>
                         </executions>

@@ -10,8 +10,8 @@
     # Root folder name for placing content
     [string]$SOURCE_CONTENT_FOLDER = "localhost-author-export",
     # Server WebDav Path
-    #$SOURCE_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
-    [string]$SOURCE_WEBDAV_PATH = "/crx",
+    #$AEM_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
+    [string]$AEM_WEBDAV_PATH = "/crx",
     [string]$AEM_SCHEMA = "http",
     #to set additional flags if required
     [string]$VLT_FLAGS = "--insecure -Xmx2g",
@@ -184,14 +184,14 @@ Write-Output "------- Disable Workflows ----------"
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 
-# Write-Output "------- Disable aem mailer bundle ----------"
-# doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
+Write-Output "------- Disable aem mailer bundle ----------"
+doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 
 
 Write-Output "------- START Importing content ----------"
-Write-Output "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH}"
+Write-Output "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** import -v ${ADDRESS}${AEM_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH}"
 
-Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${SOURCE_AEM_USER}:${SOURCE_AEM_PASSWORD} import -v ${ADDRESS}${SOURCE_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH} " | Tee-Object -FilePath "..\filevailt-import.log"
+Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:${AEM_PASSWORD} import -v ${ADDRESS}${AEM_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH} " | Tee-Object -FilePath "..\filevailt-import.log"
 
 Write-Output "------- END Importing content ----------"
 
@@ -201,5 +201,5 @@ Write-Output "------- Enable Workflows ----------"
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
 
-# Write-Output "------- Enable aem mailer bundle ----------"
-# doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE_ENABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
+Write-Output "------- Enable aem mailer bundle ----------"
+doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE_ENABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
