@@ -16,6 +16,12 @@
     #to set additional flags if required
     [string]$VLT_FLAGS = "--insecure -Xmx2g",
     [string]$VLT_CMD = "./bin/vlt",
+    # Root folder name for placing content
+    [string]$CONTENT_DESTINATION = ".\src\main\content",
+    [string]$FILTER_FILE = "${CONTENT_DESTINATION}\META-INF\vault\filter.xml",
+    [string]$FILTER_FILE_LOCATION = "${CONTENT_DESTINATION}\META-INF",
+    #which filter paths to import
+    [string[]]$ROOT_PATHS,
     [string]$ROOT_PATH = "/",
     [string]$CONTENT_SOURCE = "src\main\content\jcr_root",
     # connection timeout
@@ -102,6 +108,35 @@
 
 )
 
+
+Function Format-XMLIndent
+{
+    [Cmdletbinding()]
+    [Alias("IndentXML")]
+    param
+    (
+      [Parameter(ValueFromPipeline)]
+      [xml]$Content,
+      [int]$Indent
+    )
+
+    # String Writer and XML Writer objects to write XML to string
+    $StringWriter = New-Object System.IO.StringWriter
+    $XmlWriter = New-Object System.XMl.XmlTextWriter $StringWriter
+
+    # Default = None, change Formatting to Indented
+    $xmlWriter.Formatting = "indented"
+
+    # Gets or sets how many IndentChars to write for each level in
+    # the hierarchy when Formatting is set to Formatting.Indented
+    $xmlWriter.Indentation = $Indent
+
+    $Content.WriteContentTo($XmlWriter)
+    $XmlWriter.Flush();$StringWriter.Flush()
+    $StringWriter.ToString()
+}
+
+
 function doSlingPost {
     [CmdletBinding()]
     Param (
@@ -165,9 +200,14 @@ Write-Output "AEM_PORT: $AEM_PORT"
 Write-Output "AEM_USER: $AEM_USER"
 Write-Output "CONTENT_SOURCE: $CONTENT_SOURCE"
 Write-Output "ROOT_PATH: $ROOT_PATH"
+Write-Output "FILTER_FILE: $FILTER_FILE"
 Write-Output "Silent: $Silent"
 Write-Output "VLT_FLAGS: $VLT_FLAGS"
 Write-Output "VLT_CMD: $VLT_CMD"
+Write-Output "ROOT_PATHS:"
+$ROOT_PATHS | ForEach-Object {
+  Write-Output " - $_"
+}
 
 if (-not($Silent))
 {
@@ -179,6 +219,33 @@ if (-not($Silent))
         Exit
     }
 }
+
+
+Write-Output "------- START Update filter ----------"
+$ROOT_PATHS_LAST = $ROOT_PATHS | Select-Object -Last 1
+$ROOT_PATHS | ForEach-Object {
+  $LOG_FILENAME = "$_".Replace("/","-")
+
+  Write-Output "Remove exiting Filer..."
+  Copy-Item ".\src\main\content\META-INF\vault\filter-blank.xml" -Destination "$FILTER_FILE"
+
+  Write-Output "Create filter for: $_"
+  $FILTER_XML = [xml](Get-Content $FILTER_FILE)
+  $FILTER_XML_CONTENT = $FILTER_XML.SelectNodes("//workspaceFilter")
+  $FILTER_XML_DELETE = $FILTER_XML_CONTENT.SelectNodes('//filter')
+  $FILTER_XML_DELETE | ForEach-Object{
+    $DELETE_STATUS = $FILTER_XML_CONTENT.RemoveChild($_)
+  }
+  $FILTER_XML_CONTENT_NEW = $FILTER_XML.CreateNode("element","filter","")
+  $FILTER_XML_CONTENT_NEW.SetAttribute("root",$_)
+  $FILTER_XML_CONTENT_NEW_ADD = $FILTER_XML_CONTENT.AppendChild($FILTER_XML_CONTENT_NEW)
+  Write-Output "Saving..."
+  $FILTER_XML.OuterXml | IndentXML -Indent 4 | Out-File $FILTER_FILE -encoding "UTF8"
+  Write-Output "Done..."
+}
+
+Write-Output "------- END Update filter ----------"
+
 
 Write-Output "------- Disable Workflows ----------"
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
