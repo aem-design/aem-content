@@ -270,3 +270,7 @@ doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASS
 
 Write-Output "------- Enable aem mailer bundle ----------"
 doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE_ENABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
+
+Write-Output "------- Revert Filter.xml ----------"
+git checkout HEAD src/main/content/META-INF/vault/filter.xml
+Write-Output "------- Revert Filter.xml ----------"

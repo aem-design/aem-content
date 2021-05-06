@@ -152,3 +152,7 @@ Write-Output "Saving..."
 $FILTER_XML.OuterXml | IndentXML -Indent 4 | Out-File $FILTER_FILE -encoding "UTF8"
 Write-Output "Done."
 Write-Output "------- DONE Updating ${FILTER_FILE} ----------"
+
+Write-Output "------- Revert Filter.xml ----------"
+git checkout HEAD src/main/content/META-INF/vault/filter.xml
+Write-Output "------- Revert Filter.xml ----------"
