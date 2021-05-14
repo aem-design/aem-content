@@ -221,27 +221,36 @@ if (-not($Silent))
 }
 
 
-Write-Output "------- START Update filter ----------"
-$ROOT_PATHS_LAST = $ROOT_PATHS | Select-Object -Last 1
-$ROOT_PATHS | ForEach-Object {
-  $LOG_FILENAME = "$_".Replace("/","-")
+Write-Output "------- Revert Filter.xml ----------"
+git checkout HEAD src/main/content/META-INF/vault/filter.xml
+Write-Output "------- Revert Filter.xml ----------"
 
-  Write-Output "Remove exiting Filer..."
-  Copy-Item ".\src\main\content\META-INF\vault\filter-blank.xml" -Destination "$FILTER_FILE"
+if ($ROOT_PATHS)
+{
+    Write-Output "------- START Update filter ----------"
+    $ROOT_PATHS_LAST = $ROOT_PATHS | Select-Object -Last 1
+    $ROOT_PATHS | ForEach-Object {
+        $LOG_FILENAME = "$_".Replace("/","-")
 
-  Write-Output "Create filter for: $_"
-  $FILTER_XML = [xml](Get-Content $FILTER_FILE)
-  $FILTER_XML_CONTENT = $FILTER_XML.SelectNodes("//workspaceFilter")
-  $FILTER_XML_DELETE = $FILTER_XML_CONTENT.SelectNodes('//filter')
-  $FILTER_XML_DELETE | ForEach-Object{
-    $DELETE_STATUS = $FILTER_XML_CONTENT.RemoveChild($_)
-  }
-  $FILTER_XML_CONTENT_NEW = $FILTER_XML.CreateNode("element","filter","")
-  $FILTER_XML_CONTENT_NEW.SetAttribute("root",$_)
-  $FILTER_XML_CONTENT_NEW_ADD = $FILTER_XML_CONTENT.AppendChild($FILTER_XML_CONTENT_NEW)
-  Write-Output "Saving..."
-  $FILTER_XML.OuterXml | IndentXML -Indent 4 | Out-File $FILTER_FILE -encoding "UTF8"
-  Write-Output "Done..."
+        Write-Output "Remove exiting Filer..."
+        Copy-Item ".\src\main\content\META-INF\vault\filter-blank.xml" -Destination "$FILTER_FILE"
+
+        Write-Output "Create filter for: $_"
+        $FILTER_XML = [xml](Get-Content $FILTER_FILE)
+        $FILTER_XML_CONTENT = $FILTER_XML.SelectNodes("//workspaceFilter")
+        $FILTER_XML_DELETE = $FILTER_XML_CONTENT.SelectNodes('//filter')
+        $FILTER_XML_DELETE | ForEach-Object{
+            $DELETE_STATUS = $FILTER_XML_CONTENT.RemoveChild($_)
+        }
+        $FILTER_XML_CONTENT_NEW = $FILTER_XML.CreateNode("element","filter","")
+        $FILTER_XML_CONTENT_NEW.SetAttribute("root",$_)
+        $FILTER_XML_CONTENT_NEW_ADD = $FILTER_XML_CONTENT.AppendChild($FILTER_XML_CONTENT_NEW)
+        Write-Output "Saving..."
+        $FILTER_XML.OuterXml | IndentXML -Indent 4 | Out-File $FILTER_FILE -encoding "UTF8"
+        Write-Output "Done..."
+    }
+
+    Write-Output "------- END Update filter ----------"
 }
 
 Write-Output "------- END Update filter ----------"
