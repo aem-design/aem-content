@@ -23,86 +23,22 @@
     #which filter paths to import
     [string[]]$ROOT_PATHS,
     [string]$ROOT_PATH = "/",
-    [string]$CONTENT_SOURCE = "src\main\content\jcr_root",
+    [string]$CONTENT_SOURCE = (Resolve-Path -Path "src\main\content\jcr_root" -Relative),
     # connection timeout
     [string]$TIMEOUT = "5",
     # host address
     [string]$ADDRESS = "${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}",
-    # Workflow Assets Modify path
-    [string]$WORKFLOW_ASSET_MODIFY = "/conf/global/settings/workflow/launcher/config/update_asset_mod",
-    # Workflow Assets Create path
-    [string]$WORKFLOW_ASSET_CREATE = "/conf/global/settings/workflow/launcher/config/update_asset_create",
-    # Workflow Assets Create path
-    [string]$SERVICE_TO_DISABLE = "/system/console/bundles/com.day.cq.cq-mailer",
+    # Disable services before import
+    [string[]]$SERVICES_TO_DISABLE = @(
+        "/system/console/bundles/com.day.cq.cq-mailer",
+        "/system/console/bundles/com.adobe.granite.workflow.core"
+    ),
 
     [HashTable]$BODY_SERVICE_TO_DISABLE = @{
         "action"="stop"
     },
     [HashTable]$BODY_SERVICE_TO_DISABLE_ENABLE = @{
         "action"="start"
-    },
-    [HashTable]$WORKFLOW_ASSET_ENABLE_UPDATE = @{
-        "jcr:primaryType"= "cq:WorkflowLauncher"
-        "description"= "Update Asset - Modification"
-        "enabled"= "true"
-        "conditions"= "jcr:content/jcr:mimeType!=video/.*"
-        "glob"= "/content/dam(/((?!/subassets).)*/)renditions/original"
-        "eventType"= "16"
-        "workflow"= "/var/workflow/models/dam/update_asset"
-        "runModes"= "author"
-        "nodetype"= "nt:file"
-        "excludeList"= "event-user-data:changedByWorkflowProcess"
-        "enabled@TypeHint"="Boolean"
-        "eventType@TypeHint"="Long"
-        "conditions@TypeHint"="String[]"
-    },
-
-    [HashTable]$WORKFLOW_ASSET_DISABLE_UPDATE = @{
-        "jcr:primaryType"= "cq:WorkflowLauncher"
-        "description"= "Update Asset - Modification"
-        "enabled"= "false"
-        "conditions"= "jcr:content/jcr:mimeType!=video/.*"
-        "glob"= "/content/dam(/((?!/subassets).)*/)renditions/original"
-        "eventType"= "16"
-        "workflow"= "/var/workflow/models/dam/update_asset"
-        "runModes"= "author"
-        "nodetype"= "nt:file"
-        "excludeList"= "event-user-data:changedByWorkflowProcess"
-        "enabled@TypeHint"="Boolean"
-        "eventType@TypeHint"="Long"
-        "conditions@TypeHint"="String[]"
-    },
-
-    [HashTable]$WORKFLOW_ASSET_ENABLE_CREATE = @{
-        "jcr:primaryType"= "cq:WorkflowLauncher"
-        "description"= "Update Asset - Create"
-        "enabled"= "true"
-        "conditions"= "jcr:content/jcr:mimeType!=video/.*"
-        "glob"= "/content/dam(/((?!/subassets).)*/)renditions/original"
-        "eventType"= "1"
-        "workflow"= "/var/workflow/models/dam/update_asset"
-        "runModes"= "author"
-        "nodetype"= "nt:file"
-        "excludeList"= "event-user-data:changedByWorkflowProcess"
-        "enabled@TypeHint"="Boolean"
-        "eventType@TypeHint"="Long"
-        "conditions@TypeHint"="String[]"
-    },
-
-    [HashTable]$WORKFLOW_ASSET_DISABLE_CREATE = @{
-        "jcr:primaryType"= "cq:WorkflowLauncher"
-        "description"= "Update Asset - Create"
-        "enabled"= "false"
-        "conditions"= "jcr:content/jcr:mimeType!=video/.*"
-        "glob"= "/content/dam(/((?!/subassets).)*/)renditions/original"
-        "eventType"= "16"
-        "workflow"= "/var/workflow/models/dam/update_asset"
-        "runModes"= "author"
-        "nodetype"= "nt:file"
-        "excludeList"= "event-user-data:changedByWorkflowProcess"
-        "enabled@TypeHint"="Boolean"
-        "eventType@TypeHint"="Long"
-        "conditions@TypeHint"="String[]"
     },
     [switch]$Silent = $false
 
@@ -115,9 +51,9 @@ Function Format-XMLIndent
     [Alias("IndentXML")]
     param
     (
-      [Parameter(ValueFromPipeline)]
-      [xml]$Content,
-      [int]$Indent
+        [Parameter(ValueFromPipeline)]
+        [xml]$Content,
+        [int]$Indent
     )
 
     # String Writer and XML Writer objects to write XML to string
@@ -206,7 +142,11 @@ Write-Output "VLT_FLAGS: $VLT_FLAGS"
 Write-Output "VLT_CMD: $VLT_CMD"
 Write-Output "ROOT_PATHS:"
 $ROOT_PATHS | ForEach-Object {
-  Write-Output " - $_"
+    Write-Output " - $_"
+}
+Write-Output "SERVICES_TO_DISABLE:"
+$SERVICES_TO_DISABLE | ForEach-Object {
+    Write-Output " - $_"
 }
 
 if (-not($Silent))
@@ -219,7 +159,6 @@ if (-not($Silent))
         Exit
     }
 }
-
 
 Write-Output "------- Revert Filter.xml ----------"
 git checkout HEAD src/main/content/META-INF/vault/filter.xml
@@ -253,16 +192,14 @@ if ($ROOT_PATHS)
     Write-Output "------- END Update filter ----------"
 }
 
-Write-Output "------- END Update filter ----------"
-
-
-Write-Output "------- Disable Workflows ----------"
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_DISABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
-
-Write-Output "------- Disable aem mailer bundle ----------"
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
-
+if ($SERVICES_TO_DISABLE)
+{
+    Write-Output "------- Disable Services ----------"
+    $SERVICES_TO_DISABLE | ForEach-Object {
+        Write-Output "Stopping service: $_"
+        doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE -Url "${ADDRESS}$_" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
+    }
+}
 
 Write-Output "------- START Importing content ----------"
 Write-Output "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** import -v ${ADDRESS}${AEM_WEBDAV_PATH} ${CONTENT_SOURCE} ${ROOT_PATH}"
@@ -272,13 +209,14 @@ Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:${
 Write-Output "------- END Importing content ----------"
 
 
-Write-Output "------- Enable Workflows ----------"
-
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_UPDATE -Url "${ADDRESS}${WORKFLOW_ASSET_MODIFY}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $WORKFLOW_ASSET_ENABLE_CREATE -Url "${ADDRESS}${WORKFLOW_ASSET_CREATE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
-
-Write-Output "------- Enable aem mailer bundle ----------"
-doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE_ENABLE -Url "${ADDRESS}${SERVICE_TO_DISABLE}" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
+if ($SERVICES_TO_DISABLE)
+{
+    Write-Output "------- Disable Services ----------"
+    $SERVICES_TO_DISABLE | ForEach-Object {
+        Write-Output "Stopping service: $_"
+        doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE_ENABLE -Url "${ADDRESS}$_" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
+    }
+}
 
 Write-Output "------- Revert Filter.xml ----------"
 git checkout HEAD src/main/content/META-INF/vault/filter.xml
