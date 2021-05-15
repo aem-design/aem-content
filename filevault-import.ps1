@@ -211,7 +211,7 @@ Write-Output "------- END Importing content ----------"
 
 if ($SERVICES_TO_DISABLE)
 {
-    Write-Output "------- Disable Services ----------"
+    Write-Output "------- Enable Services ----------"
     $SERVICES_TO_DISABLE | ForEach-Object {
         Write-Output "Stopping service: $_"
         doSlingPost -Method Post -Referer $ADDRESS -UserAgent "curl" -Body $BODY_SERVICE_TO_DISABLE_ENABLE -Url "${ADDRESS}$_" -BasicAuthCreds ${AEM_USER}:${AEM_PASSWORD} -Timeout $TIMEOUT
