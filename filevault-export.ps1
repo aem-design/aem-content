@@ -88,7 +88,7 @@ Write-Output "VLT_FLAGS: $VLT_FLAGS"
 Write-Output "VLT_CMD:"
 
 $ROOT_PATHS | ForEach-Object {
-    Write-Output "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${AEM_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}"
+    Write-Output "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:****** export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${AEM_WEBDAV_PATH} / ${CONTENT_DESTINATION}"
 }
 
 if (-not($Silent))
@@ -126,7 +126,7 @@ $ROOT_PATHS | ForEach-Object {
     Write-Output "Done..."
 
     Write-Output "Running VLT..."
-    Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:${AEM_PASSWORD} export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${AEM_WEBDAV_PATH} $_ ${CONTENT_DESTINATION}" | Tee-Object -FilePath "..\filevailt-export-$LOG_FILENAME.log"
+    Invoke-Expression -Command "${VLT_CMD} ${VLT_FLAGS} --credentials ${AEM_USER}:${AEM_PASSWORD} export -v ${AEM_SCHEMA}://${AEM_HOST}:${AEM_PORT}${AEM_WEBDAV_PATH} / ${CONTENT_DESTINATION}" | Tee-Object -FilePath "..\filevailt-export-$LOG_FILENAME.log"
 
     Write-Output "END Export $_"
 }
