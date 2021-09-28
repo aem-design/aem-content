@@ -9,7 +9,7 @@
     <groupId>design.aem</groupId>
     <version>1.0.0</version>
     <artifactId>aemdesign-content</artifactId>
-    <packaging>pom</packaging>
+    <packaging>content-package</packaging>
     <name>AEM Design - Operations - Content</name>
     <description>Tools for exporting, importing and persisting AEM content in GIT</description>
 
@@ -52,28 +52,71 @@
         </license>
     </licenses>
 
+<!-- ====================================================================== -->
+    <!-- D E P E N D E N C I E S                                                -->
+    <!-- ====================================================================== -->
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.tigris.antelope</groupId>
-                <artifactId>antelopetasks</artifactId>
-                <version>${antelope.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>co.escapeideas.maven</groupId>
-                <artifactId>ansible-maven-plugin</artifactId>
-                <version>1.2.0</version>
-                <scope>provided</scope>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
+
+    <!--
+        Inclusion of repositories in POMs is controversial, to say the least.
+        It would be best if you proxied the Adobe repository using a Maven
+        Repository Manager. Once you do that, remove these sections.
+     -->
+    <repositories>
+        <repository>
+            <id>adobe-public-releases</id>
+            <name>Adobe Public Repository</name>
+            <url>https://repo.adobe.com/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>central maven</id>
+            <url>https://repo1.maven.org/maven2/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>adobe-public-releases</id>
+            <name>Adobe Public Repository</name>
+            <url>https://repo.adobe.com/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>central maven</id>
+            <url>https://repo1.maven.org/maven2/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
 
     <build>
@@ -124,6 +167,21 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+
+            <!-- ====================================================================== -->
+            <!-- V A U L T    P A C K A G E    P L U G I N                              -->
+            <!-- ====================================================================== -->
+            <plugin>
+                <groupId>com.day.jcr.vault</groupId>
+                <artifactId>content-package-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <group>${package.group}</group>
+                    <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+                    <targetURL>${package.uploadProtocol}://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
+                </configuration>
             </plugin>
 
             <!-- get git information to update artifacts version -->
