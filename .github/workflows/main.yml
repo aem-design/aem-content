@@ -73,13 +73,6 @@ jobs:
         run: |
           source <(curl -sL https://github.com/aem-design/aemdesign-docker/releases/latest/download/setup-gpg.sh)
 
-      # - name: cache sonarcloud packages
-      #   uses: actions/cache@v2.1.6
-      #   with:
-      #     path: ~/.sonar/cache
-      #     key: ${{ runner.os }}-sonar
-      #     restore-keys: ${{ runner.os }}-sonar
-
       - name: cache maven packages
         uses: actions/cache@v2.1.6
         with:
@@ -89,23 +82,6 @@ jobs:
 
       - name: mvn package
         run: $DOCKER_COMMAND mvn package -B -Dmaven.repo.local=./build/.m2/repository
-
-      # SonarQube for master
-      #- name: docker - sonar qube on master
-      #  if: github.ref == 'refs/heads/master'
-      #  run: mvn sonar:sonar -q "-Dsonar.branch.name=${GITHUB_REF}" "-Dsonar.host.url=${SONAR_URL}" "-Dsonar.login=${SONAR_TOKEN}" "-Dsonar.organization=${SONAR_ORGANISATION}"
-
-      # SonarQube for branches
-      #- name: docker - sonar qube on branches
-      #  if: github.ref != 'refs/heads/master'
-      #  run: mvn sonar:sonar -q "-Dsonar.branch.name=${GITHUB_REF}" "-Dsonar.branch.target=master" "-Dsonar.host.url=${SONAR_URL}" "-Dsonar.login=${SONAR_TOKEN}" "-Dsonar.organization=${SONAR_ORGANISATION}"
-
-      # - name: run unit tests with coverage reports
-      #   run: mvn test -q && bash <(curl -s https://codecov.io/bash)
-
-      # - name: deploy to maven cental
-      #   if: github.ref == 'refs/heads/master'
-      #   run: $DOCKER_COMMAND echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import && echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust && mvn deploy --settings default.xml -B -P release
 
       - name: create release ${{ env.GITHUB_TAG }}
         if: github.ref == 'refs/heads/master'
