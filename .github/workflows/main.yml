@@ -44,6 +44,7 @@ jobs:
       - name: set up jdk ${{ matrix.java-version }}
         uses: actions/setup-java@v2.3.0
         with:
+          distribution: 'adopt'
           java-version: ${{ matrix.java-version }}
 
       - name: set up python ${{ matrix.python-version }}
