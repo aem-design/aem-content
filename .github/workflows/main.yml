@@ -1,0 +1,132 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    runs-on: ubuntu-latest
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        java-version: [ 11 ]
+        python-version: [ 3.6 ]
+
+    env:
+      DOCKER_IMAGE: "aemdesign/centos-java-buildpack"
+      GITHUB_USER: aemdesign
+      GITHUB_EMAIL: ${{ secrets.GITHUB_EMAIL }}
+      GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+      GITHUB_TOKEN_ADMIN: ${{ secrets.GITHUB_TOKEN_ADMIN }}
+      AEM_NAME: ${{ secrets.AEM_NAME }}
+      AEM_KEY: ${{ secrets.AEM_KEY }}
+      GPG_SECRET_KEYS: ${{ secrets.GPG_SECRET_KEYS }}
+      GPG_OWNERTRUST: ${{ secrets.GPG_OWNERTRUST }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      GPG_EXECUTABLE: gpg
+      GPG_PRESET_EXECUTABLE: /usr/lib/gnupg/gpg-preset-passphrase
+      GPG_PUBID: "50A036956AAC64C13EF47B10D1E96A30ECFC7DFF"
+      GPG_PUBID_KEYGRIP: "020E615868703482DC2CD110B98D2702B6ABF89C"
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+          lfs: true
+
+      - name: set up jdk ${{ matrix.java-version }}
+        uses: actions/setup-java@v2.3.0
+        with:
+          java-version: ${{ matrix.java-version }}
+
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: get release notes
+        id: config
+        run: |
+          source <(curl -sL https://github.com/aem-design/aemdesign-docker/releases/latest/download/github_get_version.sh)
+
+      - name: release notes
+        run: |
+          echo "${{ steps.config.outputs.GIT_RELEASE_NOTES }}"
+          echo CURRENT_VERSION="${{ steps.config.outputs.CURRENT_VERSION }}"
+
+      - name: set eval variables
+        run: |
+          echo "DOCKER_COMMAND=docker run --user $(id -u):$(id -g) -v ${GITHUB_WORKSPACE}:/build ${DOCKER_IMAGE}" >> $GITHUB_ENV
+          $DOCKER_COMMAND java -version
+          $DOCKER_COMMAND node -v
+          git config --global user.email "${GITHUB_EMAIL}"
+          git config --global user.name "${GITHUB_USERNAME}"
+
+      - name: setup gpg
+        run: |
+          source <(curl -sL https://github.com/aem-design/aemdesign-docker/releases/latest/download/setup-gpg.sh)
+
+      # - name: cache sonarcloud packages
+      #   uses: actions/cache@v2.1.6
+      #   with:
+      #     path: ~/.sonar/cache
+      #     key: ${{ runner.os }}-sonar
+      #     restore-keys: ${{ runner.os }}-sonar
+
+      - name: cache maven packages
+        uses: actions/cache@v2.1.6
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: mvn package
+        run: $DOCKER_COMMAND mvn package -B -Dmaven.repo.local=./build/.m2/repository
+
+      # SonarQube for master
+      #- name: docker - sonar qube on master
+      #  if: github.ref == 'refs/heads/master'
+      #  run: mvn sonar:sonar -q "-Dsonar.branch.name=${GITHUB_REF}" "-Dsonar.host.url=${SONAR_URL}" "-Dsonar.login=${SONAR_TOKEN}" "-Dsonar.organization=${SONAR_ORGANISATION}"
+
+      # SonarQube for branches
+      #- name: docker - sonar qube on branches
+      #  if: github.ref != 'refs/heads/master'
+      #  run: mvn sonar:sonar -q "-Dsonar.branch.name=${GITHUB_REF}" "-Dsonar.branch.target=master" "-Dsonar.host.url=${SONAR_URL}" "-Dsonar.login=${SONAR_TOKEN}" "-Dsonar.organization=${SONAR_ORGANISATION}"
+
+      # - name: run unit tests with coverage reports
+      #   run: mvn test -q && bash <(curl -s https://codecov.io/bash)
+
+      # - name: deploy to maven cental
+      #   if: github.ref == 'refs/heads/master'
+      #   run: $DOCKER_COMMAND echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import && echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust && mvn deploy --settings default.xml -B -P release
+
+      - name: create release ${{ env.GITHUB_TAG }}
+        if: github.ref == 'refs/heads/master'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.config.outputs.CURRENT_VERSION }}
+          release_name: ${{ steps.config.outputs.CURRENT_VERSION }}
+          body: ${{ steps.config.outputs.GIT_RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+
+      - name: upload release asset - aemdesign-content-${{ env.GITHUB_TAG }}.zip
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ format('./aemdesign-{0}/target/aemdesign-{0}-{1}.zip', 'content', env.GITHUB_TAG) }}
+          asset_name: ${{ format('aemdesign-{0}-{1}.zip', 'content', env.GITHUB_TAG) }}
+          asset_content_type: application/zip
