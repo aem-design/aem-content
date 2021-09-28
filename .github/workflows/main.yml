@@ -87,6 +87,7 @@ jobs:
       - name: mvn result
         run: |
           ls -latr
+          ls -latr target
 
       - name: create release ${{ env.GITHUB_TAG }}
         if: github.ref == 'refs/heads/main'
@@ -108,6 +109,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ format('./aemdesign-{0}/target/aemdesign-{0}-{1}.zip', 'content', env.GITHUB_TAG) }}
+          asset_path: ${{ format('target/aemdesign-{0}-{1}.zip', 'content', env.GITHUB_TAG) }}
           asset_name: ${{ format('aemdesign-{0}-{1}.zip', 'content', env.GITHUB_TAG) }}
           asset_content_type: application/zip
