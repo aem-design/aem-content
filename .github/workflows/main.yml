@@ -84,6 +84,10 @@ jobs:
       - name: mvn package
         run: $DOCKER_COMMAND mvn package -B -Dmaven.repo.local=./build/.m2/repository
 
+      - name: mvn result
+        run: |
+          ls -latr
+
       - name: create release ${{ env.GITHUB_TAG }}
         if: github.ref == 'refs/heads/main'
         id: create_release
