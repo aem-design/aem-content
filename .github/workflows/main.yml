@@ -64,6 +64,7 @@ jobs:
 
       - name: set eval variables
         run: |
+          mkdir -p /home/runner/.m2
           echo "DOCKER_COMMAND=docker run --user $(id -u):$(id -g) -v ${GITHUB_WORKSPACE}:/build/source -w /build/source -v /home/runner/.m2:/build/.m2 ${DOCKER_IMAGE}" >> $GITHUB_ENV
           $DOCKER_COMMAND java -version
           $DOCKER_COMMAND node -v
@@ -77,12 +78,12 @@ jobs:
       - name: cache maven packages
         uses: actions/cache@v2.1.6
         with:
-          path: ~/.m2
+          path: /home/runner/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
       - name: mvn package
-        run: $DOCKER_COMMAND mvn package -B -Dmaven.repo.local=./build/.m2/repository
+        run: $DOCKER_COMMAND mvn package -B -Dmaven.repo.local=/build/.m2/repository
 
       - name: mvn result
         run: |
