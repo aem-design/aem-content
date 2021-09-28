@@ -1,12 +1,12 @@
 ﻿Param(
     #equivalent of using localhost in docker container
-    [string]$AEM_HOST = "localhost",
+    [string]$AEM_HOST = "$(if ([string]::IsNullOrWhiteSpace(${env:AEM_HOST})) {'localhost'} else {${env:AEM_HOST}})",
     # TCP port SOURCE_CQ listens on
-    [string]$AEM_PORT = "4502",
+    [string]$AEM_PORT = "$(if ([string]::IsNullOrWhiteSpace(${env:AEM_PORT})) {'4502'} else {${env:AEM_PORT}})",
     # AEM Admin user for AEM_HOST
-    [string]$AEM_USER = "admin",
+    [string]$AEM_USER = "$(if ([string]::IsNullOrWhiteSpace(${env:AEM_USER})) {'admin'} else {${env:AEM_USER}})",
     # AEM Admin password for AEM_HOST
-    [string]$AEM_PASSWORD = "admin",
+    [string]$AEM_PASSWORD = "$(if ([string]::IsNullOrWhiteSpace(${env:AEM_PASSWORD})) {'admin'} else {${env:AEM_PASSWORD}})",
     # Server WebDav Path
     #$AEM_WEBDAV_PATH = "/crx/server/crx.default/jcr:root/"
     [string]$AEM_WEBDAV_PATH = "/crx",
