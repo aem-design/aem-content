@@ -84,7 +84,7 @@ jobs:
         run: $DOCKER_COMMAND mvn package -B -Dmaven.repo.local=./build/.m2/repository
 
       - name: create release ${{ env.GITHUB_TAG }}
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -97,7 +97,7 @@ jobs:
           prerelease: false
 
       - name: upload release asset - aemdesign-content-${{ env.GITHUB_TAG }}.zip
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
