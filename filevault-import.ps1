@@ -14,8 +14,8 @@
     [string]$AEM_WEBDAV_PATH = "/crx",
     [string]$AEM_SCHEMA = "http",
     #to set additional flags if required
-    [string]$VLT_FLAGS = "--insecure -Xmx2g",
-    [string]$VLT_CMD = "./bin/vlt",
+    [string]$VLT_FLAGS = "--allowSelfSignedCertificates",
+    [string]$VLT_CMD = "./bin/vlt.ps1",
     # Root folder name for placing content
     [string]$CONTENT_DESTINATION = ".\src\main\content",
     [string]$FILTER_FILE = "${CONTENT_DESTINATION}\META-INF\vault\filter.xml",

@@ -10,12 +10,12 @@ set_term_title "Import Content"
 AEM_HOST=${AEM_HOST:-localhost}
 AEM_PORT=${AEM_PORT:-4502}
 #HOST="http://${AEM_HOST}:${AEM_PORT}/crx/server/crx.default/jcr:root/"
-HOST="http://${AEM_HOST}:${AEM_PORT}/crx"
+HOST="http://${AEM_HOST}:${AEM_PORT}/crx/server/crx.default"
 JCR_ROOT="$(realpath ./src/main/content/jcr_root/)"
 CREDENTIALS="${AEM_USER:-admin}:${AEM_PASS:-admin}"
 FILTER="./src/main/content/META-INF/vault/filter.xml"
 TIMEOUT=30
-VLT_FLAGS="--insecure -Xmx2g"
+VLT_FLAGS="--allowSelfSignedCertificates"
 ROOT_PATH="/"
 
 WATCH_COMMAND=""

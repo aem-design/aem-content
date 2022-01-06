@@ -12,7 +12,7 @@
     [string]$AEM_WEBDAV_PATH = "/crx",
     [string]$AEM_SCHEMA = "http",
     #to set additional flags if required
-    [string]$VLT_FLAGS = "--insecure -Xmx2g",
+    [string]$VLT_FLAGS = "--allowSelfSignedCertificates -Xmx2g",
     [string]$VLT_CMD = "./bin/vlt",
     # Root folder name for placing content
     [string]$CONTENT_DESTINATION = ".\src\main\content",
