@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspaceFilter version="1.0">
+    <filter root="/content/experience-fragments/aemdesign" />
+    <filter root="/content/cq:tags" />
+    <filter root="/content/aemdesign" />
+    <filter root="/content/forms/af/aemdesign" />
+    <filter root="/conf/aemdesign" />
+    <filter root="/content/dam/aemdesign" />
+</workspaceFilter>

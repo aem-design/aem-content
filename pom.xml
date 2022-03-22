@@ -120,27 +120,6 @@
 
 
     <build>
-        <resources>
-            <!-- define the resources that will go into the package -->
-            <resource>
-                <directory>src/main/content/jcr_root</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <!-- exclude .vlt control files in the package -->
-                    <exclude>**/.vlt</exclude>
-                    <exclude>**/.vltignore</exclude>
-                    <exclude>**/.gitignore</exclude>
-                    <exclude>**/*.iml</exclude>
-                    <exclude>**/.classpath</exclude>
-                    <exclude>**/.project</exclude>
-                    <exclude>**/.settings</exclude>
-                    <exclude>**/.DS_Store</exclude>
-                    <exclude>**/target/**</exclude>
-                    <exclude>**/pom.xml</exclude>
-                </excludes>
-            </resource>
-        </resources>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -574,5 +553,137 @@
                 </plugins>
             </build>
         </profile>
+        
+        <profile>
+			<id>package-nodam</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<!-- define the resources that will go into the package -->
+					<resource>
+						<directory>src/main/content/jcr_root</directory>
+						<filtering>false</filtering>
+						<includes>
+							<include>**/content/experience-fragments/aemdesign/**</include>
+							<include>**/content/cq:tags/**</include>
+							<include>**/content/aemdesign/**</include>
+							<include>**/content/forms/af/aemdesign/**</include>
+							<include>**/conf/aemdesign/**</include>
+						</includes>
+						<excludes>
+							<!-- exclude .vlt control files in the package -->
+							<exclude>**/.vlt</exclude>
+							<exclude>**/.vltignore</exclude>
+							<exclude>**/.gitignore</exclude>
+							<exclude>**/*.iml</exclude>
+							<exclude>**/.classpath</exclude>
+							<exclude>**/.project</exclude>
+							<exclude>**/.settings</exclude>
+							<exclude>**/.DS_Store</exclude>
+							<exclude>**/target/**</exclude>
+							<exclude>**/pom.xml</exclude>
+						</excludes>
+					</resource>
+				</resources>
+                <plugins>
+					<plugin>
+						<groupId>com.day.jcr.vault</groupId>
+						<artifactId>content-package-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<group>${package.group}</group>
+							<filterSource>src/main/content/META-INF/vault/filter-nodam.xml</filterSource>
+							<targetURL>${package.uploadProtocol}://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>com.coderplus.maven.plugins</groupId>
+						<artifactId>copy-rename-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<id>copy-filerxml</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<sourceFile>src/main/content/META-INF/vault/filter-nodam.xml</sourceFile>
+									<destinationFile>${project.build.directory}/vault-work/META-INF/vault/filter.xml</destinationFile>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+        <profile>
+			<id>package-all</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<!-- define the resources that will go into the package -->
+					<resource>
+						<directory>src/main/content/jcr_root</directory>
+						<filtering>false</filtering>
+						<includes>
+							<include>**/content/experience-fragments/aemdesign/**</include>
+							<include>**/content/cq:tags/**</include>
+							<include>**/content/aemdesign/**</include>
+							<include>**/content/forms/af/aemdesign/**</include>
+							<include>**/conf/aemdesign/**</include>
+                            <include>**/content/dam/aemdesign/**</include>
+						</includes>
+						<excludes>
+							<!-- exclude .vlt control files in the package -->
+							<exclude>**/.vlt</exclude>
+							<exclude>**/.vltignore</exclude>
+							<exclude>**/.gitignore</exclude>
+							<exclude>**/*.iml</exclude>
+							<exclude>**/.classpath</exclude>
+							<exclude>**/.project</exclude>
+							<exclude>**/.settings</exclude>
+							<exclude>**/.DS_Store</exclude>
+							<exclude>**/target/**</exclude>
+							<exclude>**/pom.xml</exclude>
+						</excludes>
+					</resource>
+				</resources>
+                <plugins>
+					<plugin>
+						<groupId>com.day.jcr.vault</groupId>
+						<artifactId>content-package-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<group>${package.group}</group>
+							<filterSource>src/main/content/META-INF/vault/filter-all.xml</filterSource>
+							<targetURL>${package.uploadProtocol}://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>com.coderplus.maven.plugins</groupId>
+						<artifactId>copy-rename-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<id>copy-filerxml</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<sourceFile>src/main/content/META-INF/vault/filter-all.xml</sourceFile>
+									<destinationFile>${project.build.directory}/vault-work/META-INF/vault/filter.xml</destinationFile>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
     </profiles>
 </project>
