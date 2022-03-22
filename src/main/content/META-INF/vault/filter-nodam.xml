@@ -3,6 +3,6 @@
     <filter root="/content/experience-fragments/aemdesign" />
     <filter root="/content/cq:tags" />
     <filter root="/content/aemdesign" />
-    <filter root="/content/forms/af/aemdesign/" />
-    <filter root="/conf/aemdesign/" />
+    <filter root="/content/forms/af/aemdesign" />
+    <filter root="/conf/aemdesign" />
 </workspaceFilter>
