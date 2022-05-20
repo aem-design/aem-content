@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
     <!-- ====================================================================== -->
     <!-- P R O J E C T    D E S C R I P T I O N                                 -->
@@ -13,10 +13,11 @@
     <name>AEM Design - Operations - Content</name>
     <description>Tools for exporting, importing and persisting AEM content in GIT</description>
 
-    <properties>
-        <antelope.version>3.2.10</antelope.version>
-        <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
-    </properties>
+	<properties>
+		<antelope.version>3.2.10</antelope.version>
+		<maven.site.plugin.version>3.7.1</maven.site.plugin.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
     <scm>
         <connection>scm:git:https://github.com/aem-design/aemdesign-content.git</connection>
@@ -119,7 +120,9 @@
     </pluginRepositories>
 
 
-    <build>
+	<build>
+
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -146,21 +149,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-
-            <!-- ====================================================================== -->
-            <!-- V A U L T    P A C K A G E    P L U G I N                              -->
-            <!-- ====================================================================== -->
-            <plugin>
-                <groupId>com.day.jcr.vault</groupId>
-                <artifactId>content-package-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <group>${package.group}</group>
-                    <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
-                    <targetURL>${package.uploadProtocol}://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
-                </configuration>
             </plugin>
 
             <!-- get git information to update artifacts version -->
@@ -553,9 +541,9 @@
                 </plugins>
             </build>
         </profile>
-        
-        <profile>
-			<id>package-nodam</id>
+
+		<profile>
+			<id>package-content</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>
@@ -566,11 +554,16 @@
 						<directory>src/main/content/jcr_root</directory>
 						<filtering>false</filtering>
 						<includes>
-							<include>**/content/experience-fragments/aemdesign/**</include>
-							<include>**/content/cq:tags/**</include>
-							<include>**/content/aemdesign/**</include>
-							<include>**/content/forms/af/aemdesign/**</include>
-							<include>**/conf/aemdesign/**</include>
+							<!--content-->
+							<include>**/content**</include>
+							<!--tags-->
+							<include>**/content/cq:tags**</include>
+							<!--dam-->
+							<include>**/content/dam**</include>
+							<!--experience fragments-->
+							<include>**/content/experience-fragments**</include>
+							<!--etc-->
+							<include>**/etc/designs**</include>
 						</includes>
 						<excludes>
 							<!-- exclude .vlt control files in the package -->
@@ -587,15 +580,30 @@
 						</excludes>
 					</resource>
 				</resources>
-                <plugins>
+				<plugins>
 					<plugin>
 						<groupId>com.day.jcr.vault</groupId>
 						<artifactId>content-package-maven-plugin</artifactId>
 						<extensions>true</extensions>
 						<configuration>
-							<group>${package.group}</group>
-							<filterSource>src/main/content/META-INF/vault/filter-nodam.xml</filterSource>
 							<targetURL>${package.uploadProtocol}://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
+							<filters combine.children="append">
+                                <filter>
+                                    <root>/content</root>
+                                </filter>
+                                <filter>
+                                    <root>/conf</root>
+                                </filter>
+                                <filter>
+                                    <root>/content/cq:tags</root>
+                                </filter>
+                                <filter>
+                                    <root>/content/experience-fragments</root>
+                                </filter>
+                                <filter>
+                                    <root>/etc/designs</root>
+                                </filter>
+							</filters>
 						</configuration>
 					</plugin>
 					<plugin>
@@ -610,7 +618,7 @@
 									<goal>copy</goal>
 								</goals>
 								<configuration>
-									<sourceFile>src/main/content/META-INF/vault/filter-nodam.xml</sourceFile>
+									<sourceFile>src/main/content/META-INF/vault/filter.xml</sourceFile>
 									<destinationFile>${project.build.directory}/vault-work/META-INF/vault/filter.xml</destinationFile>
 								</configuration>
 							</execution>
@@ -619,8 +627,9 @@
 				</plugins>
 			</build>
 		</profile>
-        <profile>
-			<id>package-all</id>
+
+		<profile>
+			<id>package-content-nodam</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>
@@ -631,12 +640,14 @@
 						<directory>src/main/content/jcr_root</directory>
 						<filtering>false</filtering>
 						<includes>
-							<include>**/content/experience-fragments/aemdesign/**</include>
-							<include>**/content/cq:tags/**</include>
-							<include>**/content/aemdesign/**</include>
-							<include>**/content/forms/af/aemdesign/**</include>
-							<include>**/conf/aemdesign/**</include>
-                            <include>**/content/dam/aemdesign/**</include>
+							<!--content-->
+							<include>**/content**</include>
+							<!--tags-->
+							<include>**/content/cq:tags**</include>
+							<!--experience fragments-->
+							<include>**/content/experience-fragments**</include>
+							<!--etc-->
+							<include>**/etc/designs**</include>
 						</includes>
 						<excludes>
 							<!-- exclude .vlt control files in the package -->
@@ -653,15 +664,30 @@
 						</excludes>
 					</resource>
 				</resources>
-                <plugins>
+				<plugins>
 					<plugin>
 						<groupId>com.day.jcr.vault</groupId>
 						<artifactId>content-package-maven-plugin</artifactId>
 						<extensions>true</extensions>
 						<configuration>
-							<group>${package.group}</group>
-							<filterSource>src/main/content/META-INF/vault/filter-all.xml</filterSource>
 							<targetURL>${package.uploadProtocol}://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
+							<filters combine.children="append">
+								<filter>
+									<root>/content</root>
+								</filter>
+								<filter>
+									<root>/conf</root>
+								</filter>
+								<filter>
+									<root>/content/cq:tags</root>
+								</filter>
+								<filter>
+									<root>/content/experience-fragments</root>
+								</filter>
+								<filter>
+									<root>/etc/designs</root>
+								</filter>
+							</filters>
 						</configuration>
 					</plugin>
 					<plugin>
@@ -676,7 +702,7 @@
 									<goal>copy</goal>
 								</goals>
 								<configuration>
-									<sourceFile>src/main/content/META-INF/vault/filter-all.xml</sourceFile>
+									<sourceFile>src/main/content/META-INF/vault/filter.xml</sourceFile>
 									<destinationFile>${project.build.directory}/vault-work/META-INF/vault/filter.xml</destinationFile>
 								</configuration>
 							</execution>
@@ -685,5 +711,6 @@
 				</plugins>
 			</build>
 		</profile>
-    </profiles>
+
+	</profiles>
 </project>

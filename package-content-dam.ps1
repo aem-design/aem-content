@@ -1,0 +1,1 @@
+﻿mvn --activate-profiles package-content clean package
